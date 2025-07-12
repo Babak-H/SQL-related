@@ -279,9 +279,6 @@ FROM emp;
 -- The songs table shows id of a song, the name of the song, the observed date, and the number of times it has been 
 -- played as playbacks in millions per year. A preview of the songs table is shown.
 -- Determine the total number of playbacks per year and compare that to the all time number of playbacks.
-/*
-
-*/
 select 
     date_part('year', date_observed) as yearly,
     -- total playback of all songs added together in a year
@@ -429,13 +426,11 @@ id      name    sex     salary
 3       C       m       5500
 4       D       f       800
 */
-
 UPDATE salary
 SET sex = CASE
              WHEN sex = 'f' THEN 'm'
              ELSE 'f'
           END;
-
 
 /*
 X city has opened a new cinema, many people would like to go to this cinema. the cinema also gives out a poster
@@ -464,7 +459,6 @@ output should be:
 Explanation: 
 We have three movies with odd-numbered IDs: 1, 3, and 5. The movie with ID = 3 is boring so we do not include it in the answer.
 */
-
 SELECT *
 FROM cinema
 WHERE id%2 != 0
@@ -485,7 +479,6 @@ Employee table:
 | 4  | Max   | 90000  | Null      |
 +----+-------+--------+-----------+
 */
-
 SELECT a.name as employee
 FROM Employee a
 JOIN Employee b
@@ -505,7 +498,6 @@ Person table:
 | 3  | a@b.com |
 +----+---------+
 */
-
 SELECT email
 FROM Person
 GROUP BY email
@@ -539,7 +531,6 @@ Output:
 | Bob       | Alice    | New York City | New York |
 +-----------+----------+---------------+----------+
 */
-
 SELECT p.firstName, p.lastName, a.city, a.state
 FROM Person p 
 LEFT JOIN Address a
@@ -581,7 +572,6 @@ SQL has a built-in function called DENSE_RANK(), It ranks items without skipping
 DENSE_RANK() OVER(ORDER BY score DESC)
 This will assign rank 1 to the highest score, If two scores are tied, they both get the same rank, he next different score gets the next immediate rank, not a skipped one.
 */
-
 SELECT score, 
        DENSE_RANK() OVER(ORDER BY score DESC) as rank
 FROM Scores;
@@ -619,7 +609,6 @@ Output:
 +------------+----------+--------+
 Max and Jim both have the highest salary in the IT department and Henry has the highest salary in the Sales department
 */
-
 -- we need to have DENSE_RANK as here we have both Jim and Max in the table (both have same salary)
 -- there should be join between Employee and Department tables
 -- we use CTE instead of subquery to make the code less complicated
@@ -674,7 +663,6 @@ The followers of 0 are {1}
 The followers of 1 are {0}
 The followers of 2 are {0,1}
 */
-
 SELECT user_id, COUNT(follower_id) AS followers_count
 FROM Followers
 GROUP BY user_id
@@ -718,4 +706,3 @@ FROM UserActivity) lookup
 -- OR 
 -- c=1 => If the user only has one activity, return that one
 WHERE r = 2 OR c = 1;
-
