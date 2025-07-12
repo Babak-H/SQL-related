@@ -409,3 +409,313 @@ select
     count(id) as matches
 from (select country_id, season, id from match where home_goal >= 5 or away_goal >= 5) sub
 group by country_id, season;  -- group by combination of country and season
+
+
+/*
+given a table salary, such as the one below, that m=male and f=female, swap all f and m values
+with "a single update statement" and no intermediate temp table.
+
+id      name    sex     salary
+1       A       m       2500
+2       B       f       1500
+3       C       f       5500
+4       D       m       800
+
+after running the query it should look like this:
+
+id      name    sex     salary
+1       A       f       2500
+2       B       m       1500
+3       C       m       5500
+4       D       f       800
+*/
+
+UPDATE salary
+SET sex = CASE
+             WHEN sex = 'f' THEN 'm'
+             ELSE 'f'
+          END;
+
+
+/*
+X city has opened a new cinema, many people would like to go to this cinema. the cinema also gives out a poster
+indicating the movie rating and description. write a sql query to output movies with odd numbered ID and a description
+that is not 'boring'.
+
+Cinema table:
++----+------------+-------------+--------+
+| id | movie      | description | rating |
++----+------------+-------------+--------+
+| 1  | War        | great 3D    | 8.9    |
+| 2  | Science    | fiction     | 8.5    |
+| 3  | irish      | boring      | 6.2    |
+| 4  | Ice song   | Fantacy     | 8.6    |
+| 5  | House card | Interesting | 9.1    |
++----+------------+-------------+--------+
+
+output should be:
++----+------------+-------------+--------+
+| id | movie      | description | rating |
++----+------------+-------------+--------+
+| 5  | House card | Interesting | 9.1    |
+| 1  | War        | great 3D    | 8.9    |
++----+------------+-------------+--------+
+
+Explanation: 
+We have three movies with odd-numbered IDs: 1, 3, and 5. The movie with ID = 3 is boring so we do not include it in the answer.
+*/
+
+SELECT *
+FROM cinema
+WHERE id%2 != 0
+AND description <> 'boring'
+ORDER BY rating DESC;
+
+
+/*
+the Employee table holds records for all employees (including managers), find all employees that earn more than their manager.
+
+Employee table:
++----+-------+--------+-----------+
+| id | name  | salary | managerId |
++----+-------+--------+-----------+
+| 1  | Joe   | 70000  | 3         |
+| 2  | Henry | 80000  | 4         |
+| 3  | Sam   | 60000  | Null      |
+| 4  | Max   | 90000  | Null      |
++----+-------+--------+-----------+
+*/
+
+SELECT a.name as employee
+FROM Employee a
+JOIN Employee b
+ON a.managerId = b.id
+WHERE a.salary > b.salary;
+
+
+/*
+write a SQL query to find all duplicate emails in a table named Person
+
+Person table:
++----+---------+
+| id | email   |
++----+---------+
+| 1  | a@b.com |
+| 2  | c@d.com |
+| 3  | a@b.com |
++----+---------+
+*/
+
+SELECT email
+FROM Person
+GROUP BY email
+HAVING COUNT(email) > 1;  -- where filters rows Before grouping, having does it After
+
+
+/*
+Write a solution to report the first name, last name, city, and state of each person in the Person table. If the address of a personId is not present in the Address table, report null instead.
+
+Person table:
++----------+----------+-----------+
+| personId | lastName | firstName |
++----------+----------+-----------+
+| 1        | Wang     | Allen     |
+| 2        | Alice    | Bob       |
++----------+----------+-----------+
+
+Address table:
++-----------+----------+---------------+------------+
+| addressId | personId | city          | state      |
++-----------+----------+---------------+------------+
+| 1         | 2        | New York City | New York   |
+| 2         | 3        | Leetcode      | California |
++-----------+----------+---------------+------------+
+
+Output: 
++-----------+----------+---------------+----------+
+| firstName | lastName | city          | state    |
++-----------+----------+---------------+----------+
+| Allen     | Wang     | Null          | Null     |
+| Bob       | Alice    | New York City | New York |
++-----------+----------+---------------+----------+
+*/
+
+SELECT p.firstName, p.lastName, a.city, a.state
+FROM Person p 
+LEFT JOIN Address a
+ON p.personId = a.personId;
+
+
+/*
+Write a solution to find the rank of the scores. The ranking should be calculated according to the following rules:
+
+The scores should be ranked from the highest to the lowest.
+If there is a tie between two scores, both should have the same ranking.
+After a tie, the next ranking number should be the next consecutive integer value. In other words, there should be no holes between ranks.
+Return the result table ordered by score in descending order.
+ 
+Scores table:
++----+-------+
+| id | score |
++----+-------+
+| 1  | 3.50  |
+| 2  | 3.65  |
+| 3  | 4.00  |
+| 4  | 3.85  |
+| 5  | 4.00  |
+| 6  | 3.65  |
++----+-------+
+Output: 
++-------+------+
+| score | rank |
++-------+------+
+| 4.00  | 1    |
+| 4.00  | 1    |
+| 3.85  | 2    |
+| 3.65  | 3    |
+| 3.65  | 3    |
+| 3.50  | 4    |
++-------+------+
+
+SQL has a built-in function called DENSE_RANK(), It ranks items without skipping numbers when there's a tie
+DENSE_RANK() OVER(ORDER BY score DESC)
+This will assign rank 1 to the highest score, If two scores are tied, they both get the same rank, he next different score gets the next immediate rank, not a skipped one.
+*/
+
+SELECT score, 
+       DENSE_RANK() OVER(ORDER BY score DESC) as rank
+FROM Scores;
+
+
+/*
+Write a solution to find employees who have the highest salary in each of the departments. Return the result table in any order.
+
+Employee table:
++----+-------+--------+--------------+
+| id | name  | salary | departmentId |
++----+-------+--------+--------------+
+| 1  | Joe   | 70000  | 1            |
+| 2  | Jim   | 90000  | 1            |
+| 3  | Henry | 80000  | 2            |
+| 4  | Sam   | 60000  | 2            |
+| 5  | Max   | 90000  | 1            |
++----+-------+--------+--------------+
+
+Department table:
++----+-------+
+| id | name  |
++----+-------+
+| 1  | IT    |
+| 2  | Sales |
++----+-------+
+
+Output: 
++------------+----------+--------+
+| Department | Employee | Salary |
++------------+----------+--------+
+| IT         | Jim      | 90000  |
+| Sales      | Henry    | 80000  |
+| IT         | Max      | 90000  |
++------------+----------+--------+
+Max and Jim both have the highest salary in the IT department and Henry has the highest salary in the Sales department
+*/
+
+-- we need to have DENSE_RANK as here we have both Jim and Max in the table (both have same salary)
+-- there should be join between Employee and Department tables
+-- we use CTE instead of subquery to make the code less complicated
+
+-- DENSE_RANK() => This function assigns ranking numbers to rows without gaps, even if there's a tie
+-- PARTITION BY departmentId => like grouping" the data, but without collapsing it into fewer rows, It means: for each department, apply the ranking logic independently.
+-- ORDER BY salary DESC => Within each department group, order the employees by salary in descending order (highest first), rank is assigned based on this order
+WITH RankedSalaries AS (
+    SELECT 
+        departmentId, 
+        name AS employee, 
+        salary,
+        DENSE_RANK() OVER(PARTITION BY departmentId ORDER BY salary DESC) AS denseRank
+    FROM Employee
+)
+-- For each departmentId, rank the employees based on their salary from highest to lowest. If multiple employees have the same salary, give them the same rank, and don’t skip numbers
+SELECT 
+    d.name AS Department, 
+    r.employee AS Employee, 
+    r.salary AS Salary
+FROM RankedSalaries r
+JOIN Department d ON r.departmentId = d.id
+-- This filters the results to include only the employees who have the highest salary within their department.
+-- the employee(s) with the highest salary in each department got denseRank = 1
+WHERE r.denseRank = 1
+ORDER BY d.name ASC;
+
+
+/*
+Find Followers Count. Write a solution that will, for each user, return the number of followers, Return the result table ordered by user_id in ascending order.
+
+Followers table:
++---------+-------------+
+| user_id | follower_id |
++---------+-------------+
+| 0       | 1           |
+| 1       | 0           |
+| 2       | 0           |
+| 2       | 1           |
++---------+-------------+
+
+Output: 
++---------+----------------+
+| user_id | followers_count|
++---------+----------------+
+| 0       | 1              |
+| 1       | 1              |
+| 2       | 2              |
++---------+----------------+
+
+The followers of 0 are {1}
+The followers of 1 are {0}
+The followers of 2 are {0,1}
+*/
+
+SELECT user_id, COUNT(follower_id) AS followers_count
+FROM Followers
+GROUP BY user_id
+ORDER BY user_id ASC;
+
+
+/*
+Write an SQL query to show the "second most recent activity of each user". If the user only has one activity, return that one. 
+A user can't perform more than one activity at the same time. Return the result table in any order.
+
+UserActivity:
++------------+--------------+-------------+-------------+
+| username   | activity     | startDate   | endDate     |
++------------+--------------+-------------+-------------+
+| Alice      | Travel       | 2020-02-12  | 2020-02-20  |
+| Alice      | Dancing      | 2020-02-21  | 2020-02-23  |
+| Alice      | Travel       | 2020-02-24  | 2020-02-28  |
+| Bob        | Travel       | 2020-02-11  | 2020-02-18  |
++------------+--------------+-------------+-------------+
+
+Result:
++------------+--------------+-------------+-------------+
+| username   | activity     | startDate   | endDate     |
++------------+--------------+-------------+-------------+
+| Alice      | Dancing      | 2020-02-21  | 2020-02-23  |
+| Bob        | Travel       | 2020-02-11  | 2020-02-18  |
++------------+--------------+-------------+-------------+
+
+The most recent activity of Alice is Travel from 2020-02-24 to 2020-02-28, before that she was dancing from 2020-02-21 to 2020-02-23.
+Bob only has one record, we just take that one.
+*/
+SELECT username, activity, startDate, endDate FROM
+-- we create subquery lookup and get some of the columns from it
+(SELECT username, activity, startDate, endDate,
+-- we rank all activity for each username based on when the activity ended ordered by the one finished the latest
+RANK() OVER(PARTITION BY username ORDER BY endDate DESC) r,
+-- we also get count of how many activities a user did based on its username
+COUNT(activity) OVER(PARTITION BY username) c
+FROM UserActivity) lookup
+-- r=2 => give us the second rank from subquery column r => second most recent activity of each user
+-- OR 
+-- c=1 => If the user only has one activity, return that one
+WHERE r = 2 OR c = 1;
+
