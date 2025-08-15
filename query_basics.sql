@@ -1195,6 +1195,37 @@ select
     avg(home_goal+away_goal) over(partition by season) s overall_avg
 from match;
 
+"""
+baseballstats
+---------------
+Player
+Team
+League
+BattingAvg
+Hits
+HomeRuns
+"""
+-- #1 Count() partition by players on a team
+-- output: Player,Team name, total players on team in the DB
+select 
+    Player,
+    Team,
+    -- it will count how many of the players are in each team based on the table
+    count(Player) over (partition by Team) as PlayerCountTeam
+from baseballstats;
+
+-- #2 show partition by AVG() batting average in the league
+-- output: player, league, average batting average per league
+select a.player, a.league, round(a.leagueAVG, 3) leagueAVGRounded
+from (
+select
+    player,
+    league,
+    -- find the avg of leagueAVG by each league, we can't use the round() function here
+    AVG(BattingAvg) over (partition by league) leagueAVG
+from baseballstats) a
+
+	
 -- Sliding Windows
 select 
     date, 
@@ -1477,4 +1508,5 @@ where
     account = 'ThElitEyeS' and vid = 1;
 
 -- Remove certain characters from a string
+
 REPLACE('Your String with cityName here', 'cityName', 'xyz'); -- Results : 'Your String with xyz here'
