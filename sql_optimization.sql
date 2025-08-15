@@ -706,3 +706,70 @@ FROM UserActivity) lookup
 -- OR 
 -- c=1 => If the user only has one activity, return that one
 WHERE r = 2 OR c = 1;
+
+/*
+Table: Accounts
+
++---------------+---------+
+| Column Name   | Type    |
++---------------+---------+
+| id            | int     |
+| name          | varchar |
++---------------+---------+
+id is the primary key for this table.
+This table contains the account id and the user name of each account.
+
+Table: Logins
+
++---------------+---------+
+| Column Name   | Type    |
++---------------+---------+
+| id            | int     |
+| login_date    | date    |
++---------------+---------+
+There is no primary key for this table, it may contain duplicates.
+This table contains the account id of the user who logged in and the login date. A user may log in multiple times in the day.
+
+Active users are those who logged in to their accounts for five or more consecutive days.
+Write an SQL query to find the id and the name of active users, Return the result table ordered by id.
+
+Input: 
+Accounts table:
++----+----------+
+| id | name     |
++----+----------+
+| 1  | Winston  |
+| 7  | Jonathan |
++----+----------+
+Logins table:
++----+------------+
+| id | login_date |
++----+------------+
+| 7  | 2020-05-30 |
+| 1  | 2020-05-30 |
+| 7  | 2020-05-31 |
+| 7  | 2020-06-01 |
+| 7  | 2020-06-02 |
+| 7  | 2020-06-02 |
+| 7  | 2020-06-03 |
+| 1  | 2020-06-07 |
+| 7  | 2020-06-10 |
++----+------------+
+Output: 
++----+----------+
+| id | name     |
++----+----------+
+| 7  | Jonathan |
++----+----------+
+*/
+
+-- when we want to compare two rows in the same table, we can use a self-join to connect them together
+-- we need to have 5 login records for an specific id in a row during 5 consecutive days.
+
+select distinct a.id, Accounts.name from Logins a join Logins b
+on a.id = b.id and datediff(a.login_date, b.login_date) between 1 and 4
+joins Accounts pn a.id = Accounts.id
+-- we group by a.date, since we need to use b.login_date with COUNT function.
+group by a.id, a.login_date
+-- we use distinct login since user might login several times per day
+having count(distinct b.login_date) = 4;
