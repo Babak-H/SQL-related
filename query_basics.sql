@@ -1426,6 +1426,25 @@ select ename, deptno from emp;
 
 select * from V;
 
+-- views can act as virtual tables, saving query data for later use
+-- they can be queried like a table, but do not store data themselves
+
+-- table employee : emp_no, birth_date, first_name, last_name, gender, hire_date
+-- table dept: dept_no, dept_name
+-- table dept_emp: emp_no, dept_no, from_date, to_date
+
+create view full_emps_depts as 
+select c.emp_no, first_name, last_name, gender, hire_date, dept_name
+from employee e
+join dept_emp c on e.emp_no = c.emp_no
+join dept d on c.dept_no = d.dept_no;
+
+show tables;  -- we can view table "full_emps_depts" now
+
+-- we can queryt this view like a table
+select dept_name, gender, count(*) from full_emps_depts
+group by dept_name, gender;
+
 
 -- dealing with ERROR | ON CONFLICT
 -- if there is error for duplicate id do nothing (will skip this error):
@@ -1510,3 +1529,4 @@ where
 -- Remove certain characters from a string
 
 REPLACE('Your String with cityName here', 'cityName', 'xyz'); -- Results : 'Your String with xyz here'
+
