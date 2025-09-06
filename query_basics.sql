@@ -1414,7 +1414,7 @@ declare
 	total int;
 begin
 	select sum(sI.price_in_cents) into total from cart c join shop_item as sI on sI.id = c.shop_item_id where c.user_id = new.user_id;  -- "new" here refers to the new row that is being inserted into invoice table
-	new.total_in_cents := total;
+	new.total_in_cents := total;  -- change the value for column "total_in_cents" for the record that is being inserted into "invoice" table into total (which is 'select sum(sI.price_in_cents) from cart c join shop_item as sI on sI.id = c.shop_item_id where c.user_id = new.user_id' )
 	return new;
 end;
 $$;
@@ -1468,7 +1468,7 @@ join dept d on c.dept_no = d.dept_no;
 
 show tables;  -- we can view table "full_emps_depts" now
 
--- we can queryt this view like a table
+-- we can query this view like a table
 select dept_name, gender, count(*) from full_emps_depts
 group by dept_name, gender;
 
@@ -1556,5 +1556,6 @@ where
 -- Remove certain characters from a string
 
 REPLACE('Your String with cityName here', 'cityName', 'xyz'); -- Results : 'Your String with xyz here'
+
 
 
