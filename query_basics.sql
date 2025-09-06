@@ -1398,7 +1398,34 @@ end;
 $BODY$
 
 -- we bind the trigger function to the employees table. The trigger name is last_name_changes
-create trigger last_name_changes before update on employees for each row execute procedure log_last_name_changes();
+create trigger last_name_changes 
+	before update 
+	on employees 
+	for each row 
+execute procedure log_last_name_changes();
+
+
+-- trigger before insert
+create or replace function set_invoice_total()
+	return trigger 
+	language plpgsql
+as $$
+declare 
+	total int;
+begin
+	select sum(sI.price_in_cents) into total from cart c join shop_item as sI on sI.id = c.shop_item_id where c.user_id = new.user_id;  -- "new" here refers to the new row that is being inserted into invoice table
+	new.total_in_cents := total;
+	return new;
+end;
+$$;
+
+drop trigger if exists set_invoice_total_trigger on public.invoice;
+
+create trigger set_invoice_total_trigger
+	before insert
+	on "invoice"
+	for each row
+execute procedure set_invoice_total_trigger();
 
 
 -- Views
@@ -1529,4 +1556,5 @@ where
 -- Remove certain characters from a string
 
 REPLACE('Your String with cityName here', 'cityName', 'xyz'); -- Results : 'Your String with xyz here'
+
 
