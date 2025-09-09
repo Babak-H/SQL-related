@@ -1185,6 +1185,30 @@ avg(m.home_goal + m.away_goal) over() as overall_avg
 from match as m left join country as c 
 on m.country_id = c.id;
 
+/*
+RANK()  vs  DENSE_RANK():
+
+RANK()
+Behavior: Assigns the same rank to rows with equal values (ties), but leaves gaps after ties.
+If you have scores 100, 90, 90, 80, the ranks will be:
+
+Score | RANK()
+100   | 1
+90    | 2
+90    | 2
+80    | 4   <-- Notice the gap (3 is skipped)
+
+DENSE_RANK()
+
+Behavior: Assigns the same rank to rows with equal values (ties), but does NOT leave gaps after ties.
+For the same scores 100, 90, 90, 80, the dense ranks will be:
+
+Score | DENSE_RANK()
+100   | 1
+90    | 2
+90    | 2
+80    | 3   <-- No gap (3 comes right after 2)
+*/
 
 -- Partition by => avg(home_goal) over(partion by season)
 -- find the averge for each of the seasons in this table
@@ -1556,6 +1580,7 @@ where
 -- Remove certain characters from a string
 
 REPLACE('Your String with cityName here', 'cityName', 'xyz'); -- Results : 'Your String with xyz here'
+
 
 
 
