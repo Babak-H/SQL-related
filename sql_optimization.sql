@@ -609,6 +609,7 @@ Output:
 +------------+----------+--------+
 Max and Jim both have the highest salary in the IT department and Henry has the highest salary in the Sales department
 */
+
 -- we need to have DENSE_RANK as here we have both Jim and Max in the table (both have same salary)
 -- there should be join between Employee and Department tables
 -- we use CTE instead of subquery to make the code less complicated
@@ -773,3 +774,381 @@ joins Accounts pn a.id = Accounts.id
 group by a.id, a.login_date
 -- we use distinct login since user might login several times per day
 having count(distinct b.login_date) = 4;
+
+
+-- cities with most expensive homes
+-- write a query to identify cities with higher than national average home prices, output by city name
+/*
+TABLE:
+id
+state
+city
+street
+mkt_price
+*/
+
+-- step 1
+select AVG(mkt_price) from z_housing;
+
+-- step 2
+select city, AVG(mkt_price)
+from z_housing
+group by city;
+
+-- final query, where average of the price in city, is higher than average for entire table (country)
+select city
+from z_housing
+having AVG(mkt_price) > 
+(select AVG(MKT_price) from z_housing);
+
+
+-- department with highest salary
+
+select department.name as Department, employee.name as Employee, employee.salary as Salary
+from employee join department 
+on employee.departmentid = department.id
+where (departmentid, salary) in  -- this way even if two employees have the same max salary, we still get both
+(select departmentid, max(salary) from employee group by departmentid)
+
+
+/*
++----------------+---------+
+| Column Name    | Type    |
++----------------+---------+
+| machine_id     | int     |
+| process_id     | int     |
+| activity_type  | enum    |
+| timestamp      | float   |
++----------------+---------+
+
+machine_id is the ID of a machine.
+process_id is the ID of a process running on the machine with ID machine_id.
+activity_type is an ENUM (category) of type ('start', 'end').
+timestamp is a float representing the current time in seconds.
+'start' means the machine starts the process at the given timestamp and 'end' means the machine ends the process at the given timestamp.
+The 'start' timestamp will always be before the 'end' timestamp for every (machine_id, process_id) pair.
+It is guaranteed that each (machine_id, process_id) pair has a 'start' and 'end' timestamp.
+
+There is a factory website that has several machines each running the same number of processes. Write a solution to find the average time each machine takes to complete a process.
+The time to complete a process is the 'end' timestamp minus the 'start' timestamp. The average time is calculated by the total time to complete every process on the machine divided by the number of processes that were run.
+
+Activity table:
++------------+------------+---------------+-----------+
+| machine_id | process_id | activity_type | timestamp |
++------------+------------+---------------+-----------+
+| 0          | 0          | start         | 0.712     |
+| 0          | 0          | end           | 1.520     |
+| 0          | 1          | start         | 3.140     |
+| 0          | 1          | end           | 4.120     |
+| 1          | 0          | start         | 0.550     |
+| 1          | 0          | end           | 1.550     |
+| 1          | 1          | start         | 0.430     |
+| 1          | 1          | end           | 1.420     |
+| 2          | 0          | start         | 4.100     |
+| 2          | 0          | end           | 4.512     |
+| 2          | 1          | start         | 2.500     |
+| 2          | 1          | end           | 5.000     |
++------------+------------+---------------+-----------+
+*/
+
+select machine_id, round(avg(b.timestamp - a.timestamp), 3) as processing_time
+from Acticvity a join Activity b on a.machine_id = b.machine_id and a.process_id = b.process_id
+where a.activity_type = "start" and b.activity_type = "end"
+group by machine_id;
+
+
+/*
+Table: Seat
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| student     | varchar |
++-------------+---------+
+
+If the number of students is odd, the id of the last student is not swapped.
+Return the result table ordered by id in ascending order.
+The result format is in the following example.
+Example 1:
+
+Input:
+| id          | int     |
+| student     | varchar |
++-------------+---------+
+
+Write a solution to swap the seat id of every two consecutive students. If the number of students is odd, the id of the last student is not swapped.
+Return the result table ordered by id in ascending order.
+The result format is in the following example.
+Example 1:
+
+Input: 
+Seat table:
++----+---------+
+| id | student |
++----+---------+
+| 1  | Abbot   |
+| 2  | Doris   |
+| 3  | Emerson |
+| 4  | Green   |
+| 5  | Jeames  |
++----+---------+
+Output: 
++----+---------+
+| id | student |
++----+---------+
+| 1  | Doris   |
+| 2  | Abbot   |
+| 3  | Green   |
+| 4  | Emerson |
+| 5  | Jeames  |
++----+---------+
+Explanation: 
+Note that if the number of students is odd, there is no need to change the last one's seat.
+*/
+
+select IF(id < (select max(id) from seat), if(id % 2 = 0, id-1, id+1), if(id % 2 = 0, id-1, id)) as id,
+student  from seat
+order by id;
+
+
+/*
+Table: Customers
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| name        | varchar |
++-------------+---------+
+
+Table: Orders
++-------------+------+
+| Column Name | Type |
++-------------+------+
+| id          | int  |
+| customerId  | int  |
++-------------+------+
+customerId is a foreign key (reference columns) of the ID from the Customers table.
+Each row of this table indicates the ID of an order and the ID of the customer who ordered it.
+
+Write a solution to find all customers who never order anything.
+Return the result table in any order.
+The result format is in the following example.
+
+Input: 
+Customers table:
++----+-------+
+| id | name  |
++----+-------+
+| 1  | Joe   |
+| 2  | Henry |
+| 3  | Sam   |
+| 4  | Max   |
++----+-------+
+Orders table:
++----+------------+
+| id | customerId |
++----+------------+
+| 1  | 3          |
+| 2  | 1          |
++----+------------+
+Output: 
++-----------+
+| Customers |
++-----------+
+| Henry     |
+| Max       |
++-----------+
+*/
+
+select name as Customers 
+from Customers left join Orders on Customers.id = Orders.customerId
+where customerId is null;
+
+-- second approach
+select name as Customers
+from Customers
+where id not in (select customerId from Orders);
+
+
+/*
+Table: Person
+
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| email       | varchar |
++-------------+---------+
+id is the primary key (column with unique values) for this table.
+Each row of this table contains an email. The emails will not contain uppercase letters.
+
+Write a solution to report all the duplicate emails. Note that it's guaranteed that the email field is not NULL.
+Return the result table in any order.
+The result format is in the following example.
+
+Input: 
+Person table:
++----+---------+
+| id | email   |
++----+---------+
+| 1  | a@b.com |
+| 2  | c@d.com |
+| 3  | a@b.com |
++----+---------+
+Output: 
++---------+
+| Email   |
++---------+
+| a@b.com |
++---------+
+Explanation: a@b.com is repeated two times.
+*/
+
+select email from
+(select email, count(email) as c from person group by email) as temp
+where c > 1;
+
+-- second approach
+select email from
+from person
+group by email
+having count(email) > 1;
+
+
+/*
+Table: Products
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| product_id  | int     |
+| low_fats    | enum    |
+| recyclable  | enum    |
++-------------+---------+
+
+low_fats is an ENUM (category) of type ('Y', 'N') 
+recyclable is an ENUM (category) of types ('Y', 'N') 
+Write a solution to find the ids of products that are both low fat and recyclable.
+
+Input: 
+Products table:
++-------------+----------+------------+
+| product_id  | low_fats | recyclable |
++-------------+----------+------------+
+| 0           | Y        | N          |
+| 1           | Y        | Y          |
+| 2           | N        | Y          |
+| 3           | Y        | Y          |
+| 4           | N        | N          |
++-------------+----------+------------+
+Output: 
++-------------+
+| product_id  |
++-------------+
+| 1           |
+| 3           |
++-------------+
+*/
+
+select product_id from Products 
+where low_fats = 'Y' and recyclable = 'Y';
+
+
+/*
+Table: Scores
+
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| score       | decimal |
++-------------+---------+
+id is the primary key
+Each row of this table contains the score of a game
+ 
+Write a solution to find the rank of the scores:
+The scores should be ranked from the highest to the lowest.
+If there is a tie between two scores, both should have the same ranking.
+After a tie, the next ranking number should be the next consecutive integer value. In other words, there should be no holes between ranks.
+
+Input: 
+Scores table:
++----+-------+
+| id | score |
++----+-------+
+| 1  | 3.50  |
+| 2  | 3.65  |
+| 3  | 4.00  |
+| 4  | 3.85  |
+| 5  | 4.00  |
+| 6  | 3.65  |
++----+-------+
+Output: 
++-------+------+
+| score | rank |
++-------+------+
+| 4.00  | 1    |
+| 4.00  | 1    |
+| 3.85  | 2    |
+| 3.65  | 3    |
+| 3.65  | 3    |
+| 3.50  | 4    |
++-------+------+
+*/
+
+select 
+    score, 
+    -- use ranking over the the score window partition
+    dense_rank() over (order by score desc) as "Rank" -- we use dense_rank() because we want to avoid gaps in the ranks
+from Scores;
+
+
+/*
+Nth Highest Salary
+
++-------------+------+
+| Column Name | Type |
++-------------+------+
+| id          | int  |
+| salary      | int  |
++-------------+------+
+id is the primary key 
+Each row of this table contains information about the salary of an employee.
+Write a solution to find the nth highest distinct salary from the Employee table. If there are less than n distinct salaries, return null.
+
+Input: 
+Employee table:
++----+--------+
+| id | salary |
++----+--------+
+| 1  | 100    |
+| 2  | 200    |
+| 3  | 300    |
++----+--------+
+n = 2
+Output: 
++------------------------+
+| getNthHighestSalary(2) |
++------------------------+
+| 200                    |
++------------------------+
+
+Input: 
+Employee table:
++----+--------+
+| id | salary |
++----+--------+
+| 1  | 100    |
++----+--------+
+n = 2
+Output: 
++------------------------+
+| getNthHighestSalary(2) |
++------------------------+
+| null                   |
++------------------------+
+*/
+
+select distinct salary 
+from Employee
+order by salary desc
+limit 1 offset n-1;
