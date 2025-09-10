@@ -1152,3 +1152,195 @@ select distinct salary
 from Employee
 order by salary desc
 limit 1 offset n-1;
+
+
+/*
+Table: Person
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| personId    | int     |
+| lastName    | varchar |
+| firstName   | varchar |
++-------------+---------+
+
+Table: Address
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| addressId   | int     |
+| personId    | int     |
+| city        | varchar |
+| state       | varchar |
++-------------+---------+
+Each row of this table contains information about the city and state of one person with ID = PersonId.
+Write a solution to report the first name, last name, city, and state of each person in the Person table. If the address of a personId is not present in the Address table, report null instead.
+
+Input: 
+Person table:
++----------+----------+-----------+
+| personId | lastName | firstName |
++----------+----------+-----------+
+| 1        | Wang     | Allen     |
+| 2        | Alice    | Bob       |
++----------+----------+-----------+
+Address table:
++-----------+----------+---------------+------------+
+| addressId | personId | city          | state      |
++-----------+----------+---------------+------------+
+| 1         | 2        | New York City | New York   |
+| 2         | 3        | Leetcode      | California |
++-----------+----------+---------------+------------+
+Output: 
++-----------+----------+---------------+----------+
+| firstName | lastName | city          | state    |
++-----------+----------+---------------+----------+
+| Allen     | Wang     | Null          | Null     |
+| Bob       | Alice    | New York City | New York |
++-----------+----------+---------------+----------+
+Explanation: 
+There is no address in the address table for the personId = 1 so we return null in their city and state.
+addressId = 1 contains information about the address of personId = 2.
+*/
+
+select firstName, lastName, city, state
+from Person left join Address on Person.personId = Address.personId;
+
+
+/*
+Table: Person
+
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| email       | varchar |
++-------------+---------+
+
+Write a solution to delete all duplicate emails, keeping only one unique email with the smallest id.
+
+Input: 
+Person table:
++----+------------------+
+| id | email            |
++----+------------------+
+| 1  | john@example.com |
+| 2  | bob@example.com  |
+| 3  | john@example.com |
++----+------------------+
+Output: 
++----+------------------+
+| id | email            |
++----+------------------+
+| 1  | john@example.com |
+| 2  | bob@example.com  |
++----+------------------+
+*/
+
+delete p2 
+from person p1 join person p2
+on p1.email = p2.email
+and p1.id < p2.id;  -- we keep first record with the smallest id
+
+
+/*
+Table: Employee
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| name        | varchar |
+| salary      | int     |
+| managerId   | int     |
++-------------+---------+
+
+Write a solution to find the employees who earn more than their managers.
+
+Input: 
+Employee table:
++----+-------+--------+-----------+
+| id | name  | salary | managerId |
++----+-------+--------+-----------+
+| 1  | Joe   | 70000  | 3         |
+| 2  | Henry | 80000  | 4         |
+| 3  | Sam   | 60000  | Null      |
+| 4  | Max   | 90000  | Null      |
++----+-------+--------+-----------+
+Output: 
++----------+
+| Employee |
++----------+
+| Joe      |
++----------+
+Explanation: Joe is the only employee who earns more than his manager.
+*/
+
+select e1.name as Employee
+from employee e1 join employee e2
+on e1.managerId = e2.id
+where e1.salary > e2.salary;
+
+
+/*
+Table: Employee
++--------------+---------+
+| Column Name  | Type    |
++--------------+---------+
+| id           | int     |
+| name         | varchar |
+| salary       | int     |
+| departmentId | int     |
++--------------+---------+
+departmentId is a foreign key (reference column) of the ID from the Department table.
+ 
+Table: Department
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| name        | varchar |
++-------------+---------+
+
+A company's executives are interested in seeing who earns the most money in each of the company's departments. A high earner in a department is an employee who has 
+a salary in the top three unique salaries for that department. Write a solution to find the employees who are high earners in each of the departments.
+
+Input: 
+Employee table:
++----+-------+--------+--------------+
+| id | name  | salary | departmentId |
++----+-------+--------+--------------+
+| 1  | Joe   | 85000  | 1            |
+| 2  | Henry | 80000  | 2            |
+| 3  | Sam   | 60000  | 2            |
+| 4  | Max   | 90000  | 1            |
+| 5  | Janet | 69000  | 1            |
+| 6  | Randy | 85000  | 1            |
+| 7  | Will  | 70000  | 1            |
++----+-------+--------+--------------+
+Department table:
++----+-------+
+| id | name  |
++----+-------+
+| 1  | IT    |
+| 2  | Sales |
++----+-------+
+Output: 
++------------+----------+--------+
+| Department | Employee | Salary |
++------------+----------+--------+
+| IT         | Max      | 90000  |
+| IT         | Joe      | 85000  |
+| IT         | Randy    | 85000  |
+| IT         | Will     | 70000  |
+| Sales      | Henry    | 80000  |
+| Sales      | Sam      | 60000  |
++------------+----------+--------+
+
+Constraints:
+There are no employees with the exact same name, salary and department.
+*/
+
+select department.name as "Department", e.name as "Employee", e.salary as "Salary" from
+(select departmentId, name, salary, dense_rank() over(partition by departmentid order by salary desc) as r from Employee) as e
+join department on e.departmentId = department.id
+where r <= 3;  -- r is the rank of the salary in each department assigned by dense_rank function
