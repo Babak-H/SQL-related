@@ -45,12 +45,12 @@ create table mySchema.myTable (
     ...
 );
 
-create table mySchema.company(
+create table mySchema.company (
     ID INT NOT NULL,
-    NAME VARCHAR (20) NOT NULL,
+    NAME VARCHAR(20) NOT NULL,
     AGE INT NOT NULL,
-    ADDRESS CHAR (25),
-    SALARY DECIMAL (18, 1),
+    ADDRESS CHAR(25),
+    SALARY DECIMAL(18, 1),
     PRIMARY KEY (ID)
 );
 
@@ -64,21 +64,21 @@ drop schema mySchema;  -- drop empty schema
 -- drop table table_name;
 
 create table person (
-    id int,
-    first_name varchar (50),
-    last_name varchar (50), 
-    gender varchar (6),
+    id int NOT NULL,
+    first_name varchar(50),
+    last_name varchar(50), 
+    gender varchar(6),
     date_of_birth timestamp
 );
 
 create table person_guarded (
     id bigserial not null primary key,
-    first_name varchar (50) not null,
-    last_name varchar (50) not null,
+    first_name varchar(50) not null,
+    last_name varchar(50) not null,
     gender varchar(7) not null,
     date_of_birth date not null,
-    email varchar (100),
-    country_of_birth varchar (150) not null
+    email varchar(100),
+    country_of_birth varchar(150) not null
 );
 
 -- Drop VS Drop if exists
@@ -176,13 +176,13 @@ alter TABLE table_name ADD column_name data_type;
 -- drop column from table
 alter TABLE table_name DROP column column_name;
 
--- change datatype of a column
+-- change the data type of a column
 alter TABLE table_name ALTER column column_name type new_data_type;
 
 -- set column to not null
 ALTER TABLE table_name ALTER COLUMN column_name SET NOT NULL;
 
--- adding unique constraint, so there won't be any repetition in the column cells, here the combination of column1, column2, column3 should not be repeated 
+-- addinga  unique constraint, so there won't be any repetition in the column cells, here the combination of column1, column2, column3 should not be repeated 
 ALTER TABLE table_name ADD CONSTRAINT MyUniqueConstraint UNIQUE (column1, column2, column3);
 
 -- add check constraint
@@ -194,7 +194,7 @@ ALTER TABLE students ADD CONSTRAINT age_check CHECK(age >= 18 AND age < 60);
 -- add column with specific allowed values
 job_title VARCHAR(20) NOT NULL CHECK (job_title IN ("Engineer", "Technician", "Manager"))
 
--- add it to already existing column
+-- add it to the already existing column
 ALTER TABLE distributors
 ADD CONSTRAINT check_types
 CHECK (element_type = 'lesson' OR element_type = 'quiz');
@@ -209,6 +209,9 @@ pointer to data in a table. An index in a database is very similar to an index i
 to reference all pages in a book that discusses a certain topic, you have to first refer to the index, which lists all topics
 alphabetically and then refer to one or more specific page numbers. An index helps to speed up SELECT queries and WHERE clauses;
 however, it slows down data input, with UPDATE and INSERT statements. Indexes can be created or dropped with no effect on the data.
+
+primary keys are indexed by default in almost all modern relational database systems. The database automatically creates an index on the primary key column(s) to enforce data 
+integrity and optimize performance
 */
 
 CREATE INDEX index_name ON table_name
@@ -1580,6 +1583,7 @@ where
 -- Remove certain characters from a string
 
 REPLACE('Your String with cityName here', 'cityName', 'xyz'); -- Results : 'Your String with xyz here'
+
 
 
 
