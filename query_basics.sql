@@ -1584,7 +1584,11 @@ where
 
 REPLACE('Your String with cityName here', 'cityName', 'xyz'); -- Results : 'Your String with xyz here'
 
+-- Add 10 days to a date and return the date:
+SELECT DATE_ADD("2017-06-15", INTERVAL 10 DAYS);  -- 2017-06-25
 
+-- Add 15 minutes to a date and return the date:
+SELECT DATE_ADD("2017-06-15 09:34:21", INTERVAL 15 MINUTE);  -- 2017-06-15 09:49:21
 
 
 
